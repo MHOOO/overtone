@@ -9,7 +9,7 @@
         [clojure.set :only [intersection difference]]))
 
 (def NUM-THREADS (cpu-count))
-(def FORCE-SYNC? false)
+(def ^:dynamic FORCE-SYNC? false)
 (defonce thread-pool (Executors/newFixedThreadPool NUM-THREADS))
 (defonce event-handlers* (ref {}))
 (defonce sync-event-handlers* (ref {}))

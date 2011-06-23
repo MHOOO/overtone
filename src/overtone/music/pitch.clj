@@ -3,9 +3,11 @@
           This is the place for functions representing general musical knowledge, like scales, chords,
           intervals, etc."
      :author "Jeff Rose, Sam Aaron & Marius Kempe"}
-  overtone.music.pitch
-  (:use [clojure.contrib.str-utils2 :only (chop)])
+  overtone.music.pitch 
   (:require [clojure.contrib.math :as math]))
+
+(defn chop [s]
+  (reduce str (drop-last s)))
 
 ;; Notes in a typical scale are related by small, prime number ratios. Of all
 ;; possible 7 note scales, the major scale has the highest number of consonant

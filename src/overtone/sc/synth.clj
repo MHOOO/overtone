@@ -12,8 +12,7 @@
     [overtone util event time-utils]
     [overtone.sc.ugen defaults]
     [overtone.sc core ugen synthdef node buffer]
-    [clojure.contrib [def :only [name-with-attributes]]]
-    [clojure.contrib.seq-utils :only (indexed)]))
+    [clojure.contrib [def :only [name-with-attributes]]]))
 ;;TODO replace this with clojure.core/keep-indexed or map-indexed))
 
 ;; ### Synth
@@ -26,9 +25,10 @@
 (def *params* nil)
 
 (defn- ugen-index [ugens ugen]
-  (first (first (filter (fn [[i v]]
-                          (= (:id v) (:id ugen)))
-                        (indexed ugens)))))
+  (first (first (filter-indexed
+                 (fn [[i v]]
+                   (= (:id v) (:id ugen)))
+                 ugens))))
 
 ; TODO: Ugh...  There must be a nicer way to do this.  I need to get the group
 ; number (source) and param index within the group (index) from a grouped
@@ -39,12 +39,12 @@
 (defn- param-input-spec [grouped-params param-proxy]
   (let [param-name (:name param-proxy)
         ctl-filter (fn [[idx ctl]] (= param-name (:name ctl)))
-        [[src group] foo] (take 1 (filter
-                              (fn [[src grp]]
-                                (not (empty?
-                                       (filter ctl-filter (indexed grp)))))
-                              (indexed grouped-params)))
-        [[idx param] bar] (take 1 (filter ctl-filter (indexed group)))]
+        [[src group] foo] (take 1 (filter-indexed
+                                   (fn [[src grp]]
+                                     (not (empty?
+                                           (filter-indexed ctl-filter grp))))
+                                   grouped-params))
+        [[idx param] bar] (take 1 (filter-indexed ctl-filter group))]
     (if (or (nil? src) (nil? idx))
       (throw (IllegalArgumentException. (str "Invalid parameter name: " param-name ". Please make sure you have named all parameters in the param map in order to use them inside the synth definition."))))
     {:src src :index idx}))
@@ -172,10 +172,11 @@
   [grouped-params]
   (let [param-list (flatten grouped-params)
         pvals  (map #(:value %1) param-list)
-        pnames (map (fn [[idx param]]
-                      {:name (to-str (:name param))
-                       :index idx})
-                    (indexed param-list))]
+        pnames (map-indexed
+                (fn [idx param]
+                  {:name (to-str (:name param))
+                   :index idx})
+                param-list)]
     [pvals pnames]))
 
 (defn- ugen-form? [form]

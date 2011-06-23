@@ -7,8 +7,7 @@
   (:use clojure.contrib.def
         clojure.stacktrace
         overtone.doc-util
-        [clojure.pprint :as pprint]
-        [clojure.contrib.seq-utils :only (indexed)])
+        [clojure.pprint :as pprint])
 
   (:import [java.util ArrayList Collections]
            [java.util.concurrent TimeUnit TimeoutException]))
@@ -226,12 +225,20 @@
   [m keys val]
         (assoc-in m keys (dissoc (get-in m keys) val)))
 
+(defn filter-indexed
+  [f seq]
+  (keep-indexed (fn [i v] (if (f [i v])
+                            v
+                            nil))
+                seq))
+
 (defn index-of
   "Return the index of item in col."
   [col item]
-  (first (first (filter (fn [[i v]]
-                          (= v item))
-                        (indexed col)))))
+  (first (first (filter-indexed
+                 (fn [[i v]]
+                   (= v item))
+                 col))))
 
 (def DEFAULT-PROMISE-TIMEOUT 1000)
 

@@ -5,7 +5,7 @@
   (:refer-clojure :exclude (deftype))
 
   (:use
-   clojure.contrib.pprint
+   clojure.pprint
    overtone.sc.ugen.defaults
    [overtone util]
    [overtone.sc buffer bus]
@@ -449,8 +449,8 @@
 (defn output-proxy [ugen index]
   (UGenOutputProxy. ugen (:rate ugen) (REVERSE-RATES (:rate ugen)) index))
 
-(def *ugens* nil)
-(def *constants* nil)
+(def ^:dynamic *ugens* nil)
+(def ^:dynamic *constants* nil)
 
 (defn ugen [spec rate special args]
   ;;(check-ugen-args spec rate special args)

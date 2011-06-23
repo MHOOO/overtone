@@ -14,9 +14,9 @@
   (:use
    [overtone event config log setup util time-utils deps]
    [overtone.sc allocator]
-   [clojure.contrib.java-utils :only [file]]
-   [clojure.contrib pprint]
-   [clojure.contrib shell-out]
+   [clojure.java.io :only [file]]
+   [clojure pprint]
+   [clojure.java shell]
    osc))
 
 (def SERVER-HOST "127.0.0.1")

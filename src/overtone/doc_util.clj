@@ -2,8 +2,8 @@
     ^{:doc "Utility functions for the generation of docstrings"
       :author "Sam Aaron"}
   overtone.doc-util
-  (:use
-   [clojure.contrib.string :only (split replace-re replace-str)])
+  (:require
+   [clojure.string :as str])
 )
 
 (defn length-of-longest-key
@@ -37,10 +37,10 @@
   docstrings to contain \n for formatting purposes in source form rather than
   require them to exist on one large line."
   ([txt max-len indent] (let [id (str (java.util.UUID/randomUUID))
-                              split-text (replace-re #"[\n]{2}" id txt)
-                              split-text (replace-str "\n" " " split-text)
-                              split-text (replace-str id "\n\n " split-text)
-                              split-text (split #" +" split-text)]
+                              split-text (str/replace txt #"[\n]{2}" id)
+                              split-text (str/replace split-text "\n" " ")
+                              split-text (str/replace split-text id "\n\n ")
+                              split-text (str/split split-text #" +")]
                           (indented-str-block "" split-text 0 max-len indent)))
   ([s ls cur-len max-len indent]
      (if (empty? ls)

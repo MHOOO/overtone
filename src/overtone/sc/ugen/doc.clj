@@ -5,7 +5,7 @@
   (:use
    overtone.sc.ugen.defaults
    overtone.doc-util
-   [clojure.contrib.string :only (split)]))
+   [clojure.string :only (split)]))
 
 (defn- args-str
   "Returns a string representing the arguments of the ugen spec"
