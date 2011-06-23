@@ -228,7 +228,7 @@
 (defn filter-indexed
   [f seq]
   (keep-indexed (fn [i v] (if (f [i v])
-                            v
+                            [i v]
                             nil))
                 seq))
 
