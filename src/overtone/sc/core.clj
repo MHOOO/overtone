@@ -95,8 +95,8 @@
   always different names with different drivers or hardware then we need to find
   a better strategy to auto-connect."
   ([] (connect-jack-ports 2))
-  ([n-channels]
-     (let [port-list (sh "jack_lsp")
+  ([n-channels] 
+     (let [port-list (:out (sh "jack_lsp"))
            sc-ins         (re-seq #"SuperCollider.*:in_[0-9]*" port-list)
            sc-outs        (re-seq #"SuperCollider.*:out_[0-9]*" port-list)
            system-ins     (re-seq #"system:capture_[0-9]*" port-list)
@@ -107,7 +107,7 @@
                                      (interleave sc-outs system-outs)
                                      (interleave sc-outs interface-outs)
                                      (interleave system-ins sc-ins)
-                                     (interleave interface-ins sc-ins)))]
+                                     (interleave interface-ins sc-ins)))] 
        (doseq [[src dest] connections]
          (sh "jack_connect" src dest)
          (log/info "jack_connect " src dest)))))
