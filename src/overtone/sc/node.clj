@@ -278,7 +278,7 @@
 ;		] * M
 ;	] * the number of nodes in the subtree
 
-(def ^:dynamic *node-tree-data* nil)
+(def ^{:dynamic true} *node-tree-data* nil)
 
 (defn- parse-synth-tree
   [id ctls?]

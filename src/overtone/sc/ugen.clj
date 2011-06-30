@@ -449,8 +449,8 @@
 (defn output-proxy [ugen index]
   (UGenOutputProxy. ugen (:rate ugen) (REVERSE-RATES (:rate ugen)) index))
 
-(def ^:dynamic *ugens* nil)
-(def ^:dynamic *constants* nil)
+(def ^{:dynamic true} *ugens* nil)
+(def ^{:dynamic true} *constants* nil)
 
 (defn ugen [spec rate special args]
   ;;(check-ugen-args spec rate special args)
