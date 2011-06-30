@@ -20,7 +20,7 @@
        (on-done "/b_alloc" #(do
                               (reset! ready? true)
                               (reset! info (buffer-info id))))
-       (snd "/b_alloc" id size num-channels)
+       (snd "/b_alloc" (Integer. id) (Integer. size) (Integer. num-channels))
        (with-meta {:id id
                    :size size
                    :ready? ready?}
@@ -57,7 +57,7 @@
              (buffer? buf) (:id buf)
              (number? buf) buf
              :default (throw (Exception. "Not a valid buffer or buffer id.")))]
-    (snd "/b_free" id)
+    (snd "/b_free" (Integer. id))
     (free-id :audio-buffer id)
     :done))
 
@@ -68,7 +68,7 @@
   (loop [reqd 0]
     (when (< reqd len)
       (let [to-req (long (min MAX-OSC-SAMPLES (- len reqd)))]
-        (snd "/b_getn" (:id buf) (+ start reqd) to-req)
+        (snd "/b_getn" (Integer. (:id buf)) (Integer. (+ start reqd)) (Integer. to-req))
         (recur (+ reqd to-req)))))
   (let [samples (float-array len)]
     (loop [recvd 0]
@@ -88,26 +88,26 @@
   "Write into a section of an audio buffer."
   [buf start len data]
   (assert (buffer? buf))
-  (apply snd "/b_setn" (:id buf) start len (map double data)))
+  (apply snd "/b_setn" (Integer. (:id buf)) (Integer. start) (Integer. len) (map double data)))
 
 (defn buffer-fill
   "Fill a buffer range with a single value."
   [buf start len val]
   (assert (buffer? buf))
-  (snd "/b_fill" (:id buf) start len (double val)))
+  (snd "/b_fill" (Integer. (:id buf)) (Integer. start) (Integer. len) (double val)))
 
 (defn buffer-set
   "Write a single value into a buffer."
   [buf index val]
   (assert (buffer? buf))
-  (snd "/b_set" (:id buf) index (double val)))
+  (snd "/b_set" (Integer. (:id buf)) (Integer. index) (double val)))
 
 (defn buffer-get
   "Read a single value from a buffer."
   [buf index]
   (assert (buffer? buf))
   (let [res (recv "/b_set")]
-    (snd "/b_get" (:id buf) index)
+    (snd "/b_get" (Integer. (:id buf)) (Integer. index))
     (last (:args (await-promise! res)))))
 
 (defn buffer-save
@@ -121,9 +121,9 @@
                         :start-frame 0
                         :leave-open 0})
         {:keys [header samples n-frames start-frame leave-open]} arg-map]
-    (snd "/b_write" (:id buf) path header samples
-         n-frames start-frame
-         (if leave-open 1 0))
+    (snd "/b_write" (Integer. (:id buf)) path header samples
+         (Integer. n-frames) (Integer. start-frame)
+         (Integer. (if leave-open 1 0)))
     :done))
 
 (defmulti buffer-id type)
@@ -146,7 +146,7 @@
   [buf]
   (let [mesg-p (recv "/b_info")
         buf-id (buffer-id buf)
-        _   (snd "/b_query" buf-id)
+        _   (snd "/b_query" (Integer. buf-id))
         msg (await-promise! mesg-p)
         [buf-id n-frames n-channels rate] (:args msg)]
     (with-meta     {:n-frames n-frames

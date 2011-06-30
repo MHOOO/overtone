@@ -39,7 +39,7 @@
     (on-done "/b_allocRead" #(do
                                (reset! ready true)
                                (reset! info (buffer-info id))))
-    (snd "/b_allocRead" id path start n-frames)
+    (snd "/b_allocRead" (Integer. id) path (Integer. start) (Integer. n-frames))
     (dosync (alter loaded-samples* assoc [path args] sample))
     sample))
 

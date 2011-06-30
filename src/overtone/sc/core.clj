@@ -88,7 +88,7 @@
   synth IDs when they are automatically freed with envelope triggers.  It also
   lets us receive custom messages from various trigger ugens."
   [notify?]
-  (snd "/notify" (if (false? notify?) 0 1)))
+  (snd "/notify" (if (false? notify?) (Integer. 0) (Integer. 1))))
 
 (defn connect-jack-ports
   "Connect the jack input and output ports as best we can.  If jack ports are
@@ -238,7 +238,7 @@
   [& [timeout]]
   (let [sync-id (rand-int 999999)
         reply-p (recv "/synced")
-        _ (snd "/sync" sync-id)
+        _ (snd "/sync" (Integer. sync-id))
         reply (await-promise! reply-p (if timeout timeout REPLY-TIMEOUT))
         reply-id (first (:args reply))]
     (= sync-id reply-id)))
@@ -396,9 +396,9 @@
     (do
       (log/level :debug)
       (osc-debug true)
-      (snd "/dumpOSC" 1))
+      (snd "/dumpOSC" (Integer. 1)))
     (do
       (log/level :error)
       (osc-debug false)
-      (snd "/dumpOSC" 0))))
+      (snd "/dumpOSC" (Integer. 0)))))
 

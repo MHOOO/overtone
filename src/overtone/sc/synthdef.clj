@@ -205,15 +205,18 @@
    be re-loaded if the server needs rebooted. If the server is currently not running, the synthdef loading
    is delayed until the server has succesfully connected."
   [sdef]
+  (log/debug "load-synthdef START")
   (assert (synthdef? sdef))
   (dosync (alter loaded-synthdefs* assoc (:name sdef) sdef))
 
   (when (connected?)
     (let [res (recv "/done")]
       (snd "/d_recv" (synthdef-bytes sdef))
-      (await-promise! res))))
+      (await-promise! res)))
+  (log/debug "load-synthdef DONE"))
 
 (defn- load-all-synthdefs []
+  (log/debug "load-all-synthdef")
   (doseq [[sname sdef] @loaded-synthdefs*]
     (snd "/d_recv" (synthdef-bytes sdef))
     (satisfy-deps :synthdefs-loaded)))
@@ -223,5 +226,6 @@
 (defn load-synth-file
   "Load a synth definition file onto the audio server."
   [path]
+  (log/debug (str "load-synth file: " path))
   (snd "/d_recv" (synthdef-bytes (synthdef-read path))))
 

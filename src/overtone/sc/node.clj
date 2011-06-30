@@ -42,7 +42,7 @@
   (let [n-id (node-id node)
         ctl (to-str control)
         bus (bus->id control-bus)]
-    (snd "/n_map" n-id ctl bus)))
+    (snd "/n_map" (Integer. n-id) (Integer. ctl) (Integer. bus))))
 
 (defn- map-and-check-node-args
   [arg-map]
@@ -87,8 +87,8 @@
            position (or ((get location :position :tail) POSITION) 1)
            target   (get location :target 0)
            arg-map  (map-and-check-node-args arg-map)
-           args     (flatten (seq arg-map))]
-       (apply snd "/s_new" synth-name id position target args)
+           args     (flatten (seq arg-map))] 
+       (apply snd "/s_new" synth-name (Integer. id) (Integer. position) (Integer. target) args)
        id)))
 
 ;; ### Synth node callbacks
@@ -100,7 +100,7 @@
   "Remove a synth node."
   [& node-ids]
   {:pre [(connected?)]}
-  (apply snd "/n_free" node-ids)
+  (apply snd "/n_free" (map #(Integer. %) node-ids))
   (doseq [id node-ids] (free-id :node id)))
 
 (defn- node-destroyed
@@ -136,7 +136,8 @@
   (let [id (alloc-id :node)
         pos (if (keyword? position) (get POSITION position) position)
         pos (or pos 1)]
-    (snd "/g_new" id pos target-id)
+    (println snd "/g_new" id pos target-id)
+    (snd "/g_new" (Integer. id) (Integer. pos) (Integer. target-id))
     id))
 
 (defn group-free
@@ -149,27 +150,27 @@
   "Start a stopped synth node."
   [node-id]
   {:pre [(connected?)]}
-  (snd "/n_run" node-id 1))
+  (snd "/n_run" (Integer. node-id) (Integer. 1)))
 
 (defn node-stop
   "Stop a running synth node."
   {:pre [(connected?)]}
   [node-id]
-  (snd "/n_run" node-id 0))
+  (snd "/n_run" (Integer. node-id) (Integer. 0)))
 
 (defn node-place
   "Place a node :before or :after another node."
   [node-id position target-id]
   {:pre [(connected?)]}
   (cond
-    (= :before position) (snd "/n_before" node-id target-id)
-    (= :after  position) (snd "/n_after" node-id target-id)))
+    (= :before position) (snd "/n_before" (Integer. node-id) (Integer. target-id))
+    (= :after  position) (snd "/n_after" (Integer. node-id) (Integer. target-id))))
 
 (defn node-control
   "Set control values for a node."
   [node-id & name-values]
   {:pre [(connected?)]}
-  (apply snd "/n_set" node-id (floatify (stringify (bus->id name-values))))
+  (apply snd "/n_set" (Integer. node-id) (floatify (stringify (bus->id name-values))))
   node-id)
 
 ; This can be extended to support setting multiple ranges at once if necessary...
@@ -178,13 +179,18 @@
   all nodes in the group."
   [node-id ctl-start & ctl-vals]
   {:pre [(connected?)]}
-  (apply snd "/n_setn" node-id ctl-start (count ctl-vals) ctl-vals))
+  (apply snd "/n_setn"
+         (Integer. node-id)
+         (if (number? ctl-start)
+           (Integer. ctl-start)
+           ctl-start)
+         (Integer. (count ctl-vals)) ctl-vals))
 
 (defn node-map-controls
   "Connect a node's controls to a control bus."
   [node-id & names-busses]
   {:pre [(connected?)]}
-  (apply snd "/n_map" node-id names-busses))
+  (apply snd "/n_map" (Integer. node-id) (map #(Integer. %) names-busses)))
 
 (defn post-tree
   "Posts a representation of this group's node subtree, i.e. all the groups and
@@ -192,22 +198,22 @@
   for synths."
   [id & [with-args?]]
   {:pre [(connected?)]}
-  (snd "/g_dumpTree" id with-args?))
+  (snd "/g_dumpTree" (Integer. id) (Integer. with-args?)))
 
 (defn prepend-node
   "Add a synth node to the end of a group list."
   [g n]
-  (snd "/g_head" g n))
+  (snd "/g_head" (Integer. g) (Integer. n)))
 
 (defn append-node
   "Add a synth node to the end of a group list."
   [g n]
-  (snd "/g_tail" g n))
+  (snd "/g_tail" (Integer. g) (Integer. n)))
 
 (defn group-clear
   "Free all child synth nodes in a group."
   [group-id]
-  (snd "/g_freeAll" group-id))
+  (snd "/g_freeAll" (Integer. group-id)))
 
 (defn- synth-kind
   "Resolve synth kind depending on type of arguments. Intended for use as a multimethod dispatch fn"
@@ -319,7 +325,7 @@
   ([id & [ctls?]]
    (let [ctls? (if (or (= 1 ctls?) (= true ctls?)) 1 0)]
      (let [reply-p (recv "/g_queryTree.reply")
-           _ (snd "/g_queryTree" id ctls?)
+           _ (snd "/g_queryTree" (Integer. id) (Integer. ctls?))
           tree (:args (await-promise! reply-p))]
        (with-meta (parse-node-tree tree)
          {:type ::node-tree})))))
