@@ -63,11 +63,11 @@
 
 (defn buffer-read
   "Read a section of an audio buffer."
-  [buf start len]
+  [buf start ^long len]
   (assert (buffer? buf))
   (loop [reqd 0]
     (when (< reqd len)
-      (let [to-req (min MAX-OSC-SAMPLES (- len reqd))]
+      (let [to-req (long (min MAX-OSC-SAMPLES (- len reqd)))]
         (snd "/b_getn" (:id buf) (+ start reqd) to-req)
         (recur (+ reqd to-req)))))
   (let [samples (float-array len)]
@@ -82,7 +82,7 @@
             (when samps
               (aset-float samples idx (first samps))
               (recur (inc idx) (next samps))))
-          (recur (+ recvd blen)))))))
+          (recur (+ recvd (long blen))))))))
 
 (defn buffer-write
   "Write into a section of an audio buffer."
