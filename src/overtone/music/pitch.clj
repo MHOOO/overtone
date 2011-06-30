@@ -7,7 +7,7 @@
   (:require [clojure.contrib.math :as math]))
 
 (defn chop [s]
-  (reduce str (drop-last s)))
+  (reduce str "" (drop-last s)))
 
 ;; Notes in a typical scale are related by small, prime number ratios. Of all
 ;; possible 7 note scales, the major scale has the highest number of consonant
