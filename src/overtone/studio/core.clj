@@ -201,7 +201,9 @@
      (event :new-inst :inst inst#)
      inst#))
 
-(defn inst? [o]
+(defn inst?
+  "Returns true if o is an instrument, false otherwise"
+  [o]
   (and (associative? o)
        (= ::instrument (:type o))))
 
@@ -286,4 +288,3 @@
                              (vals (ns-publics 'overtone.instrument))))]
     ;(println "loading synth: " (:name synth))
     (load-synthdef synth)))
-
